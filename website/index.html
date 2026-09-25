@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SCALEGPT</title>
+<meta name="description" content="SCALEGPT is the enterprise AI platform that answers from company knowledge with sources, runs specialized agents, and keeps every step governed.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230F6B5E'/%3E%3Cpath d='M9 21c2 2 5 2.5 7.5 2 3-.6 5-2.6 5-5.2 0-5.6-11-3.6-11-8.6C10.5 7 12.7 5.6 15.5 5.6c2 0 3.8.7 5 1.9' fill='none' stroke='%23fff' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #EEF1EE;
+  --paper-2: #E3E8E4;
+  --surface: #FFFFFF;
+  --ink: #17212B;
+  --ink-2: #4A5663;
+  --line: #CBD3CE;
+  --teal: #0F6B5E;
+  --teal-ink: #FFFFFF;
+  --teal-soft: #D5E8E3;
+  --band: #17212B;
+  --band-ink: #EEF1EE;
+  --c-public: #2F7D3A;
+  --c-internal: #2A5DB0;
+  --c-confidential: #A86200;
+  --c-restricted: #B3261E;
+  --radius-lg: 18px;
+  --radius-sm: 6px;
+  --measure: 68ch;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #121A20; --paper-2: #18222A; --surface: #1C2730; --ink: #E6ECE8; --ink-2: #A5B1AC;
+    --line: #2E3C45; --teal: #3FB3A0; --teal-ink: #0B1A17; --teal-soft: #173A35;
+    --band: #0B1216; --band-ink: #E6ECE8;
+    --c-public: #6CC27A; --c-internal: #7EA8F0; --c-confidential: #E3A548; --c-restricted: #F07A70;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #121A20; --paper-2: #18222A; --surface: #1C2730; --ink: #E6ECE8; --ink-2: #A5B1AC;
+  --line: #2E3C45; --teal: #3FB3A0; --teal-ink: #0B1A17; --teal-soft: #173A35;
+  --band: #0B1216; --band-ink: #E6ECE8;
+  --c-public: #6CC27A; --c-internal: #7EA8F0; --c-confidential: #E3A548; --c-restricted: #F07A70;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font: 400 1.0625rem/1.6 "IBM Plex Sans", system-ui, sans-serif;
+  overflow-x: hidden;
+}
+h1, h2, h3 { font-family: "Bricolage Grotesque", system-ui, sans-serif; line-height: 1.05; margin: 0; letter-spacing: -0.02em; }
+p { margin: 0; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--teal); outline-offset: 3px; border-radius: 4px; }
+
+.wrap { width: min(1180px, 100% - 32px); margin-inline: auto; }
+
+.top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 20px; }
+.brand { display: flex; align-items: center; gap: 10px; font: 800 1.25rem/1 "Bricolage Grotesque", sans-serif; text-decoration: none; letter-spacing: -0.02em; }
+.brand svg { width: 30px; height: 30px; }
+.top nav { display: flex; gap: 28px; font-size: .95rem; }
+.top nav a { text-decoration: none; color: var(--ink-2); }
+.top nav a:hover { color: var(--ink); }
+.top-actions { display: flex; gap: 10px; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 20px; border-radius: 999px; font-weight: 600; font-size: .98rem; text-decoration: none;
+  background: var(--teal); color: var(--teal-ink); border: 1px solid var(--teal);
+}
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn:hover { filter: brightness(1.08); }
+
+.hero { display: grid; grid-template-columns: 1fr 1.08fr; gap: 56px; align-items: center; padding-block: 48px 96px; }
+.hero h1 { font-size: clamp(2.6rem, 5.6vw, 4.6rem); font-weight: 800; }
+.hero .lede { margin-top: 24px; font-size: 1.2rem; color: var(--ink-2); max-width: 36ch; }
+.hero .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+
+.demo {
+  margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg);
+  box-shadow: 0 1px 0 var(--line), 0 30px 60px -30px rgba(15, 50, 45, .35);
+  overflow: hidden;
+}
+.demo-bar { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-bottom: 1px solid var(--line); font-size: .85rem; color: var(--ink-2); }
+.demo-bar .agent { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: var(--teal-soft); color: var(--ink); font-weight: 500; }
+.demo-bar .agent::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--teal); }
+.demo-body { padding: 22px 22px 8px; display: grid; gap: 18px; }
+.q { justify-self: end; max-width: 85%; background: var(--paper-2); padding: 12px 16px; border-radius: 16px 16px 4px 16px; font-size: .98rem; }
+.a { font-size: .98rem; min-height: 7.5em; }
+.cite { display: inline-grid; place-items: center; min-width: 1.4em; height: 1.4em; padding-inline: 4px; margin-left: 2px; border-radius: 5px; background: var(--teal-soft); color: var(--ink); font-size: .72rem; font-weight: 600; vertical-align: 2px; }
+.sources { display: grid; gap: 8px; }
+.sources h3, .actions h3 { font: 600 .82rem/1 "IBM Plex Sans", sans-serif; color: var(--ink-2); letter-spacing: 0; margin-bottom: 2px; }
+.actions h3 { margin-bottom: 10px; }
+.src { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font-size: .9rem; }
+.src .n { font-weight: 600; color: var(--ink-2); }
+.src .t { min-width: 0; }
+.src .t b { display: block; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.src .t small { color: var(--ink-2); }
+.tag { font-size: .74rem; font-weight: 600; padding: 3px 8px; border-radius: var(--radius-sm); border: 1px solid currentColor; white-space: nowrap; }
+.tag.public { color: var(--c-public); } .tag.internal { color: var(--c-internal); }
+.tag.confidential { color: var(--c-confidential); } .tag.restricted { color: var(--c-restricted); }
+.actions { padding: 14px 22px 12px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font: 500 .85rem/1 "IBM Plex Sans", sans-serif; padding: 9px 12px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; }
+.chip:hover { border-color: var(--teal); }
+.chip[aria-pressed="true"] { background: var(--teal); border-color: var(--teal); color: var(--teal-ink); }
+.demo-note { padding: 0 22px 18px; font-size: .82rem; color: var(--ink-2); min-height: 1.4em; }
+
+.js .reveal { opacity: 0; transform: translateY(6px); }
+.js .reveal.on { opacity: 1; transform: none; transition: opacity .45s ease, transform .45s ease; }
+.caret::after { content: ""; display: inline-block; width: 2px; height: 1em; margin-left: 2px; background: var(--teal); vertical-align: -2px; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .js .reveal { opacity: 1; transform: none; }
+  .caret::after { animation: none; }
+}
+
+section { padding-block: 96px; }
+.sec-head { max-width: var(--measure); margin-bottom: 48px; }
+.sec-head h2 { font-size: clamp(2rem, 3.8vw, 3rem); font-weight: 800; }
+.sec-head p { margin-top: 16px; color: var(--ink-2); font-size: 1.12rem; }
+
+.shift { border-top: 1px solid var(--line); }
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+.compare h3 { font-size: 1.35rem; font-weight: 600; margin-bottom: 18px; }
+.steps-old { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; color: var(--ink-2); }
+.steps-old li { padding: 10px 14px; border-left: 2px dashed var(--line); }
+.one-step { padding: 28px; border-radius: var(--radius-lg); background: var(--teal); color: var(--teal-ink); }
+.one-step p { font-size: 1.15rem; max-width: 40ch; }
+.one-step ul { margin: 18px 0 0; padding-left: 1.1em; }
+
+.scale { background: var(--band); color: var(--band-ink); }
+.scale .sec-head p { color: color-mix(in srgb, var(--band-ink) 75%, transparent); }
+.scale-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid color-mix(in srgb, var(--band-ink) 25%, transparent); }
+.scale-list li { padding: 24px 20px 8px 0; }
+.scale-list .L { display: block; font: 800 clamp(4rem, 9vw, 8rem)/.85 "Bricolage Grotesque", sans-serif; color: #4FC2AE; letter-spacing: -0.04em; }
+.scale-list h3 { margin-top: 18px; font-size: 1.3rem; font-weight: 600; }
+.scale-list p { margin-top: 10px; font-size: .95rem; color: color-mix(in srgb, var(--band-ink) 72%, transparent); max-width: 24ch; }
+
+.agents-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 48px; }
+.agent-row { display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; padding: 22px 0; border-top: 1px solid var(--line); }
+.agent-row h3 { font-size: 1.3rem; font-weight: 600; }
+.agent-row p { grid-column: 1 / -1; color: var(--ink-2); font-size: .98rem; }
+.agent-row .phase { font-size: .82rem; color: var(--ink-2); align-self: center; }
+.chain { margin-top: 56px; padding: 28px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); }
+.chain h3 { font-size: 1.2rem; font-weight: 600; }
+.chain > p { color: var(--ink-2); margin-top: 6px; max-width: var(--measure); }
+.chain ol { list-style: none; padding: 0; margin: 22px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.chain li { padding: 8px 14px; border-radius: 999px; background: var(--paper-2); font-size: .92rem; font-weight: 500; }
+.chain li.sep { background: none; padding: 0; color: var(--ink-2); }
+.chain li.approve { background: var(--teal-soft); }
+
+.access { background: var(--paper-2); }
+.access-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 56px; align-items: start; }
+.ladder { display: grid; gap: 10px; }
+.rung { display: grid; grid-template-columns: 140px 1fr; gap: 16px; align-items: center; padding: 16px 18px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); transition: opacity .25s ease; }
+.rung .tag { justify-self: start; }
+.rung p { font-size: .95rem; color: var(--ink-2); }
+.rung.hidden-for { opacity: .4; }
+.rung.hidden-for p::after { content: " Not retrieved for this role."; font-weight: 600; color: var(--ink); }
+.viewer { margin-top: 20px; }
+.viewer .label { font-weight: 600; font-size: .95rem; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.promise { font-size: clamp(1.5rem, 2.6vw, 2.1rem); font-family: "Bricolage Grotesque", sans-serif; font-weight: 600; line-height: 1.2; letter-spacing: -0.015em; }
+.promise-list { margin: 28px 0 0; padding: 0; list-style: none; display: grid; gap: 14px; }
+.promise-list li { padding-left: 22px; position: relative; color: var(--ink-2); }
+.promise-list li::before { content: ""; position: absolute; left: 0; top: .72em; width: 10px; height: 2px; background: var(--teal); }
+.promise-list b { color: var(--ink); font-weight: 600; }
+
+.road { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; counter-reset: ph; }
+.road > li { counter-increment: ph; padding-top: 18px; border-top: 3px solid var(--line); }
+.road > li.now { border-top-color: var(--teal); }
+.road > li::before { content: counter(ph); display: block; font: 800 2.4rem/1 "Bricolage Grotesque", sans-serif; color: var(--ink-2); }
+.road > li.now::before { color: var(--teal); }
+.road h3 { margin-top: 10px; font-size: 1.2rem; font-weight: 600; }
+.road .dur { font-size: .85rem; color: var(--ink-2); margin-top: 4px; }
+.road ul { margin: 12px 0 0; padding-left: 1.05em; font-size: .93rem; color: var(--ink-2); }
+
+.targets { border-top: 1px solid var(--line); }
+.target-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
+.target-grid h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 10px; }
+.target-grid ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: .96rem; color: var(--ink-2); }
+.target-grid strong { color: var(--ink); font-weight: 600; }
+.fine { margin-top: 32px; font-size: .88rem; color: var(--ink-2); max-width: var(--measure); }
+
+.close { padding-block: 104px; }
+.close h2 { font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 800; max-width: 18ch; }
+.close p { margin-top: 18px; color: var(--ink-2); font-size: 1.15rem; max-width: 52ch; }
+.close .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+footer { border-top: 1px solid var(--line); padding-block: 28px; font-size: .88rem; color: var(--ink-2); display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.theme-btn { background: none; border: 1px solid var(--line); color: var(--ink-2); border-radius: 999px; padding: 6px 12px; font: inherit; cursor: pointer; }
+
+@media (max-width: 980px) {
+  .hero, .access-grid, .compare { grid-template-columns: 1fr; gap: 40px; }
+  .scale-list { grid-template-columns: repeat(2, 1fr); }
+  .scale-list li:last-child { grid-column: 1 / -1; }
+  .road { grid-template-columns: 1fr 1fr; }
+  .target-grid { grid-template-columns: 1fr 1fr; }
+  .top nav { display: none; }
+}
+@media (max-width: 620px) {
+  section { padding-block: 64px; }
+  .hero { padding-block: 24px 64px; }
+  .agents-grid, .road, .target-grid, .scale-list { grid-template-columns: 1fr; }
+  .rung { grid-template-columns: 1fr; gap: 8px; }
+  .demo-body { padding: 16px 16px 4px; }
+  .actions, .demo-note { padding-inline: 16px; }
+  .top .btn { padding: 10px 16px; font-size: .9rem; white-space: nowrap; }
+  .top-actions .btn:not(.ghost) { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="#" aria-label="SCALEGPT home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="var(--teal)"/><path d="M9 21c2 2 5 2.5 7.5 2 3-.6 5-2.6 5-5.2 0-5.6-11-3.6-11-8.6C10.5 7 12.7 5.6 15.5 5.6c2 0 3.8.7 5 1.9" fill="none" stroke="var(--teal-ink)" stroke-width="2.6" stroke-linecap="round"/></svg>
+      SCALEGPT
+    </a>
+    <nav aria-label="Sections">
+      <a href="#framework">Framework</a>
+      <a href="#agents">Agents</a>
+      <a href="#governance">Governance</a>
+      <a href="#roadmap">Roadmap</a>
+    </nav>
+    <div class="top-actions">
+      <a class="btn ghost" href="/login">Log in</a>
+      <a class="btn" href="#start">Request access</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div>
+        <h1>Ask the company. Get the answer and where it came from.</h1>
+        <p class="lede">SCALEGPT answers from your company’s own documents, shows every source, and hands the work to a specialist agent when you need a proposal, a business case or an architecture.</p>
+        <div class="ctas">
+          <a class="btn" href="#start">Request access</a>
+          <a class="btn ghost" href="#agents">See the agents</a>
+        </div>
+      </div>
+
+      <figure class="demo" aria-label="Example SCALEGPT answer">
+        <div class="demo-bar"><span class="agent">General Agent</span><span>Corporate knowledge</span></div>
+        <div class="demo-body">
+          <p class="q reveal">Apa kebijakan terkait procurement software?</p>
+          <div class="a reveal">
+            <p id="answer">Software purchases above the department threshold go through a formal vendor evaluation with IT Security review before any contract is signed <span class="cite">1</span>. SaaS tools that store customer data also need a data-classification check and a signed DPA <span class="cite">2</span>. Renewals under 12 months can use the fast-track form <span class="cite">3</span>.</p>
+          </div>
+          <div class="sources reveal">
+            <h3>Sources</h3>
+            <div class="src"><span class="n">1</span><span class="t"><b>Procurement Policy, v3.2</b><small>Owner: Procurement. Effective Jan 2026</small></span><span class="tag internal">Internal</span></div>
+            <div class="src"><span class="n">2</span><span class="t"><b>Data Handling Standard for SaaS</b><small>Owner: Cyber Security</small></span><span class="tag confidential">Confidential</span></div>
+            <div class="src"><span class="n">3</span><span class="t"><b>Fast-track Renewal Guide</b><small>Owner: Procurement</small></span><span class="tag internal">Internal</span></div>
+          </div>
+        </div>
+        <div class="actions reveal">
+          <h3>Next steps</h3>
+          <div class="chips" role="group" aria-label="Actions on this answer">
+            <button class="chip" type="button" aria-pressed="false" data-note="Summary ready: 3 bullet points, sources kept.">Summarize</button>
+            <button class="chip" type="button" aria-pressed="false" data-note="Proposal Agent will draft a vendor request using these three policies.">Create proposal</button>
+            <button class="chip" type="button" aria-pressed="false" data-note="Business Case Agent will estimate cost, ROI and payback for the purchase.">Create business case</button>
+            <button class="chip" type="button" aria-pressed="false" data-note="A 5-slide deck will be generated from this answer.">Create PPT</button>
+          </div>
+        </div>
+        <p class="demo-note" id="demo-note" aria-live="polite">Example answer. Pick a next step to see which agent takes over.</p>
+      </figure>
+    </div>
+  </main>
+</div>
+
+<section class="shift" aria-labelledby="shift-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 id="shift-h">One place to ask, instead of six places to look</h2>
+      <p>Today a simple question sends people through search engines, shared drives, colleagues and several systems before anyone writes a line. SCALEGPT puts knowledge, agents and tools behind a single conversation.</p>
+    </div>
+    <div class="compare">
+      <div>
+        <h3>How work gets done today</h3>
+        <ol class="steps-old">
+          <li>Search Google</li>
+          <li>Search internal documents</li>
+          <li>Ask colleagues</li>
+          <li>Open multiple systems</li>
+          <li>Analyze manually</li>
+          <li>Write the document by hand</li>
+        </ol>
+      </div>
+      <div class="one-step">
+        <h3>With SCALEGPT</h3>
+        <p>Ask once. SCALEGPT finds the right knowledge, calls the right agent or tool, and returns a business-ready output with its sources.</p>
+        <ul>
+          <li>Knowledge through access-aware RAG</li>
+          <li>Specialist agents for product, solution and business work</li>
+          <li>Tools and enterprise systems through MCP</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="scale" id="framework" aria-labelledby="scale-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 id="scale-h">The name is the plan</h2>
+      <p>Every capability in SCALEGPT maps to one of five commitments.</p>
+    </div>
+    <ul class="scale-list">
+      <li><span class="L" aria-hidden="true">S</span><h3>Synergize</h3><p>Brings models, data, knowledge, applications, APIs and MCP tools into one interface.</p></li>
+      <li><span class="L" aria-hidden="true">C</span><h3>Customer &amp; Culture</h3><p>Builds AI literacy, knowledge sharing and customer-centric habits across teams.</p></li>
+      <li><span class="L" aria-hidden="true">A</span><h3>Automate</h3><p>Takes over analysis, documentation, proposals, reporting and research.</p></li>
+      <li><span class="L" aria-hidden="true">L</span><h3>Lead</h3><p>Turns information into insights, recommendations and business cases.</p></li>
+      <li><span class="L" aria-hidden="true">E</span><h3>Expand</h3><p>Grows an ecosystem of agents, partners, APIs and external models.</p></li>
+    </ul>
+  </div>
+</section>
+
+<section id="agents" aria-labelledby="agents-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 id="agents-h">Agents for the work people actually do</h2>
+      <p>Each agent knows its domain, uses the knowledge you are allowed to see, and can hand off to another agent when the task needs it.</p>
+    </div>
+    <div class="agents-grid">
+      <div class="agent-row"><h3>General Agent</h3><span class="phase">Phase 1</span><p>Everyday questions, summaries and drafting across all corporate knowledge.</p></div>
+      <div class="agent-row"><h3>Product Agent</h3><span class="phase">Phase 3</span><p>Product information, comparisons, positioning, roadmap and analysis.</p></div>
+      <div class="agent-row"><h3>Solution Agent</h3><span class="phase">Phase 3</span><p>Requirement analysis, solution design and reference architectures.</p></div>
+      <div class="agent-row"><h3>Business Case Agent</h3><span class="phase">Phase 3</span><p>Revenue, cost, CAPEX, OPEX, ROI, NPV, IRR and payback.</p></div>
+      <div class="agent-row"><h3>Proposal Agent</h3><span class="phase">Phase 3</span><p>Proposals, RFP and tender responses, executive summaries.</p></div>
+      <div class="agent-row"><h3>Architecture Agent</h3><span class="phase">Phase 3</span><p>HLD, LLD, architecture diagrams and technology selection.</p></div>
+      <div class="agent-row"><h3>Market Intelligence Agent</h3><span class="phase">Phase 3</span><p>Market research, competitor, industry and customer analysis.</p></div>
+      <div class="agent-row"><h3>Documentation Agent</h3><span class="phase">Phase 3</span><p>Meeting summaries, reports, SOPs and minutes.</p></div>
+    </div>
+
+    <div class="chain">
+      <h3>Agents work together, and people approve what leaves the building</h3>
+      <p>A request like “Buat business case AI Contact Center” moves through several agents. Any action that touches an external system waits for a person to approve it.</p>
+      <ol aria-label="Example multi-agent workflow">
+        <li>Business case request</li><li class="sep" aria-hidden="true">›</li>
+        <li>Product Agent</li><li class="sep" aria-hidden="true">›</li>
+        <li>Market Intelligence Agent</li><li class="sep" aria-hidden="true">›</li>
+        <li>Finance review</li><li class="sep" aria-hidden="true">›</li>
+        <li class="approve">Human approval</li><li class="sep" aria-hidden="true">›</li>
+        <li>Final business case</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section class="access" id="governance" aria-labelledby="gov-h">
+  <div class="wrap access-grid">
+    <div>
+      <div class="sec-head" style="margin-bottom:28px">
+        <h2 id="gov-h">It only answers from what you are allowed to read</h2>
+        <p>Every document carries a classification, an owner and an access level. Retrieval checks your role before a single paragraph reaches the model.</p>
+      </div>
+      <div class="ladder" id="ladder">
+        <div class="rung" data-level="0"><span class="tag public">Public</span><p>Press releases, published product sheets.</p></div>
+        <div class="rung" data-level="1"><span class="tag internal">Internal</span><p>Policies, SOPs, internal product knowledge.</p></div>
+        <div class="rung" data-level="2"><span class="tag confidential">Confidential</span><p>Pricing, customer proposals, security standards.</p></div>
+        <div class="rung" data-level="3"><span class="tag restricted">Restricted</span><p>Board material, M&amp;A, personal data.</p></div>
+      </div>
+      <div class="viewer">
+        <span class="label" id="role-l">See what each role can retrieve</span>
+        <div class="seg" role="group" aria-labelledby="role-l">
+          <button class="chip" type="button" data-max="1" aria-pressed="true">Employee</button>
+          <button class="chip" type="button" data-max="2" aria-pressed="false">Solution Architect</button>
+          <button class="chip" type="button" data-max="3" aria-pressed="false">Management</button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <p class="promise">Governance built into the platform, not left in a policy document.</p>
+      <ul class="promise-list">
+        <li><b>Single sign-on and role-based access</b> through your enterprise identity provider, with MFA.</li>
+        <li><b>Audit trail</b> for every prompt, model, agent, tool and knowledge source used.</li>
+        <li><b>PII protection and DLP</b> on what goes in and what comes out.</li>
+        <li><b>Human-in-the-loop</b> for any action with external impact.</li>
+        <li><b>Model and prompt policy</b> set by the AI Governance Committee.</li>
+        <li><b>Cost and usage tracking</b> per user, conversation, model and agent.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="roadmap" aria-labelledby="road-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 id="road-h">Five phases from chat to an AI-native enterprise</h2>
+      <p>Each phase ships something people can use before the next one starts.</p>
+    </div>
+    <ol class="road">
+      <li class="now"><h3>Foundation</h3><p class="dur">4–6 weeks</p><ul><li>SSO login and admin</li><li>Multi-model chat</li><li>File upload</li><li>Basic analytics</li></ul></li>
+      <li><h3>Knowledge</h3><p class="dur">4–6 weeks</p><ul><li>Knowledge base and RAG</li><li>Metadata and RBAC</li><li>Citations</li><li>100 to 1,000 documents</li></ul></li>
+      <li><h3>Agents</h3><p class="dur">6–8 weeks</p><ul><li>Product, Solution, Business Case</li><li>Proposal, Architecture</li><li>Market Intelligence</li></ul></li>
+      <li><h3>Automation</h3><p class="dur">6–8 weeks</p><ul><li>MCP and enterprise APIs</li><li>Multi-agent workflows</li><li>Human approval</li></ul></li>
+      <li><h3>Enterprise scale</h3><p class="dur">Ongoing</p><ul><li>Advanced RBAC and DLP</li><li>Model routing and cost control</li><li>Evaluation and SLA monitoring</li></ul></li>
+    </ol>
+  </div>
+</section>
+
+<section class="targets" aria-labelledby="targets-h">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 id="targets-h">What the MVP has to prove</h2>
+      <p>Success is counted in work finished with SCALEGPT’s help, such as proposals, business cases and analyses completed, not in the number of chats.</p>
+    </div>
+    <div class="target-grid">
+      <div><h3>Adoption</h3><ul><li><strong>500</strong> registered users</li><li><strong>300</strong> monthly active</li><li><strong>100</strong> daily active</li></ul></div>
+      <div><h3>Knowledge</h3><ul><li><strong>1,000</strong> documents indexed</li><li><strong>70%+</strong> of RAG answers with usable sources</li></ul></div>
+      <div><h3>Quality</h3><ul><li><strong>90%+</strong> citation accuracy</li><li><strong>85%+</strong> agent task success</li><li><strong>Under 5%</strong> critical hallucination</li></ul></div>
+      <div><h3>Productivity</h3><ul><li><strong>20–30%</strong> less time on selected document tasks</li><li><strong>30%</strong> of active users on a specialist agent</li></ul></div>
+    </div>
+    <p class="fine">These are initial engineering targets for the MVP, not measured results.</p>
+  </div>
+</section>
+
+<div class="wrap">
+  <div class="close" id="start">
+    <h2>Bring SCALEGPT to your team</h2>
+    <p>The first phase gives your team single sign-on, multi-model chat, file upload and an admin console. Tell the platform team which knowledge and agents your unit needs first.</p>
+    <div class="ctas">
+      <a class="btn" href="mailto:scalegpt-platform@example.com?subject=SCALEGPT%20access%20request">Request access</a>
+      <a class="btn ghost" href="/login">Log in</a>
+    </div>
+  </div>
+  <footer>
+    <span>SCALEGPT, built on LibreChat. Run by the SCALEGPT Platform Team.</span>
+    <button class="theme-btn" type="button" id="theme">Switch theme</button>
+  </footer>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var saved = null;
+  try { saved = localStorage.getItem('scalegpt-theme'); } catch (e) {}
+  if (saved) root.setAttribute('data-theme', saved);
+  root.classList.add('js');
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var steps = Array.prototype.slice.call(document.querySelectorAll('.reveal'));
+  var answer = document.getElementById('answer');
+  function show(i) { if (steps[i]) steps[i].classList.add('on'); }
+
+  if (reduce) {
+    steps.forEach(function (s) { s.classList.add('on'); });
+  } else {
+    var tokens = answer.innerHTML.split(/(<span class="cite">\d<\/span>|\s+)/).filter(Boolean);
+    answer.innerHTML = '';
+    answer.classList.add('caret');
+    setTimeout(function () { show(0); }, 250);
+    setTimeout(function () {
+      show(1);
+      var i = 0;
+      var t = setInterval(function () {
+        answer.insertAdjacentHTML('beforeend', tokens[i++]);
+        if (i < tokens.length) return;
+        clearInterval(t);
+        answer.classList.remove('caret');
+        show(2);
+        setTimeout(function () { show(3); }, 350);
+      }, 28);
+    }, 900);
+  }
+
+  function pressGroup(selector, onPick) {
+    var buttons = document.querySelectorAll(selector);
+    buttons.forEach(function (b) {
+      b.addEventListener('click', function () {
+        buttons.forEach(function (o) { o.setAttribute('aria-pressed', String(o === b)); });
+        onPick(b);
+      });
+    });
+  }
+
+  var note = document.getElementById('demo-note');
+  pressGroup('.actions .chip', function (b) { note.textContent = b.getAttribute('data-note'); });
+
+  var rungs = document.querySelectorAll('#ladder .rung');
+  function applyRole(max) {
+    rungs.forEach(function (r) { r.classList.toggle('hidden-for', +r.getAttribute('data-level') > max); });
+  }
+  pressGroup('.seg .chip', function (b) { applyRole(+b.getAttribute('data-max')); });
+  applyRole(1);
+
+  document.getElementById('theme').addEventListener('click', function () {
+    var cur = root.getAttribute('data-theme') ||
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    var next = cur === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('scalegpt-theme', next); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>
